@@ -23,7 +23,7 @@ window.onload = function(){
     //key listeners
     setupInputs()
     //Create Player
-    player = new Player(100,400)
+    player = new Player(300,200)
 
     //Create Borders
     for(let i = 0; i < 6; i++){
@@ -78,6 +78,16 @@ function setupInputs(){
     })
 }
 
+function checkIntersection(r1, r2){
+    if(r1.x >= r2.x + r2.width){return false}
+    else if(r1.x + r1.width <= r2.x){return false;}
+    else if(r1.y >= r2.y + r2.height){return false;}
+    else if(r1.y + r1.height <= r2.y){return false}
+    else{return true}
+}
+
+
+
 function Player(x,y){
     this.x = x
     this.y = y
@@ -109,25 +119,65 @@ function Player(x,y){
             //vertical movement
 
             //correct the speed
-            if(this.xspeed > this.maxSpeed){
-                this.xspeed = this.maxSpeed
-            }else if(this.xspeed < -this.maxSpeed){
-                this.xspeed = -this.maxSpeed
+            if(this.xspeed > this.maxSpeed){this.xspeed = this.maxSpeed}
+            else if(this.xspeed < -this.maxSpeed){this.xspeed = -this.maxSpeed}
+            if(this.yspeed > this.maxSpeed){this.yspeed = this.maxSpeed}
+            else if(this.yspeed < -this.maxSpeed){this.yspeed = -this.maxSpeed}
+
+            if(this.xspeed > 0){this.xspeed = Math.floor(this.xspeed)}
+            else{this.xspeed = Math.ceil(this.xspeed)}
+
+            let horizontalRect = {
+                x: this.x + this.xspeed,
+                y: this.y,
+                width: this.width,
+                height: this.height
             }
-            if(this.yspeed > this.maxSpeed){
-                this.yspeed = this.maxSpeed
-            }else if(this.yspeed < -this.maxSpeed){
-                this.yspeed = -this.maxSpeed
+            let verticalRect ={
+                x: this.x,
+                y: this.y + this.yspeed,
+                width: this.width,
+                height: this.height
             }
-        this.x += this.xspeed
-        this.y += this.yspeed
+
+            //check for intersections
+            borders.forEach((border)=>{
+                let borderRect ={
+                    x: border.x,
+                    y: border.y,
+                    width: border.width,
+                    height: border.height
+                }
+                if(checkIntersection(horizontalRect, borderRect)){
+                    while(checkIntersection(horizontalRect, borderRect)){
+                        horizontalRect.x -= Math.sign(this.xspeed)//tell us if its positive or negative
+                    }
+                    this.x = horizontalRect.x
+                    this.xspeed = 0
+                }
+                if(checkIntersection(verticalRect, borderRect)){
+                    while(checkIntersection(verticalRect, borderRect)){
+                        verticalRect.y -= Math.sign(this.yspeed)
+                    }
+                    this.y = verticalRect.y
+                    this.yspeed = 0
+                }
+            })
+
+            this.x += this.xspeed
+            this.y += this.yspeed
         }
-    }
     this.draw = function(){
         ctx.fillStyle = "green"
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
 }
+}
+
+
+
+
+
 
 function Border(x, y, width, height, type){
     this.x = x;
@@ -137,11 +187,8 @@ function Border(x, y, width, height, type){
     this.type = type;
 
     this.draw = function(){
-        if(this.type === 1){
-            ctx.fillStyle = "blue"
-        }else if(this.type === 2){
-            ctx.fillStyle = "red"
-        }
+        if(this.type === 1){ctx.fillStyle = "blue"}
+        else if(this.type === 2){ctx.fillStyle = "red"}
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
 }
