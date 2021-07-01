@@ -4,6 +4,7 @@ let canvas
 let ctx
 let gameLoop
 let player
+let borders = [];
 
 //create input variables
 
@@ -23,6 +24,15 @@ window.onload = function(){
     setupInputs()
     //Create Player
     player = new Player(100,400)
+
+    //Create Borders
+    for(let i = 0; i < 6; i++){
+        borders.push(new Border(0+100*i, 620, 100, 100, 1))
+    }
+    borders.push(new Border(0, 520, 100, 100, 2))
+    for(let i = 0; i < 3; i++){
+        borders.push(new Border(600, 420 + 100 * i, 100, 100, 100))
+    }
 
     //startGame loop
     gameLoop = setInterval(step, 1000/30)
@@ -44,7 +54,7 @@ function draw(){
     ctx.fillRect(0,0,1280,720)
 
     player.draw()
-
+    borders.forEach((border)=>border.draw())
 }
 
 function setupInputs(){
@@ -115,6 +125,23 @@ function Player(x,y){
     }
     this.draw = function(){
         ctx.fillStyle = "green"
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+    }
+}
+
+function Border(x, y, width, height, type){
+    this.x = x;
+    this.y = y;
+    this.width  = width;
+    this.height = height;
+    this.type = type;
+
+    this.draw = function(){
+        if(this.type === 1){
+            ctx.fillStyle = "blue"
+        }else if(this.type === 2){
+            ctx.fillStyle = "red"
+        }
         ctx.fillRect(this.x, this.y, this.width, this.height)
     }
 }
